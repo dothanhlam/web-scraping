@@ -49,7 +49,7 @@ app.parseLensDetail = function(url, file) {
         cheerioTableparser($);
 
         var lensName = $('.SPTitle').text();
-        var data = $('table').parsetable(true, true, false);
+        var data = $('table').parsetable(true, true);
         var jsonData = {
             id: app.genGUID(),
             name: "",
@@ -62,6 +62,13 @@ app.parseLensDetail = function(url, file) {
             weight: "",
             presetAperture: "",
             mount: "",
+            category: "",
+            minAperture:"",
+            apBlades:"",
+            filter: "",
+            year:"",
+            dimensions:"",
+            description: "",
             gallery: [],
         };
 
@@ -75,14 +82,24 @@ app.parseLensDetail = function(url, file) {
         jsonData.weight = data[1][6];
         jsonData.presetAperture = data[1][7];
         jsonData.mount = data[1][8];
+        jsonData.category = cheerio.load(data[3][2]).text();
+        jsonData.minAperture = data[3][3];
+        jsonData.apBlades = data[3][4];
+        jsonData.filter = data[3][5];
+        jsonData.year = data[3][6];
+        jsonData.dimensions = data[3][7];
 
+        console.log(jsonData)
         var imageGalleries = $('a[class=modal]');
         imageGalleries.filter(function() {
             var data = $(this);
             jsonData.gallery.push(data.attr('href'));
         });
 
-        console.log('lens: ', jsonData);
+        var des = $('div[class=inf_det]');
+        jsonData.description = des.text().replace("Info / Description:", "");
+
+        console.log('parse: ', jsonData.name);
 
         fs.appendFileSync(file, JSON.stringify(jsonData) + ",");
 
@@ -95,22 +112,23 @@ app.filesProcess = function(from, to, file){
     for (var i = from; i<= to; i ++) {
         allFiles.push('./results/lens-' + i + '.json');
     }
-    console.log('concat: ', concat);
-
     concat(allFiles, file, function(err) {
         if (err) throw err
-        console.log('done');
+        console.log('files concat done');
     });
 
 }
 
+app.batchParsing = function(from, to) {
+    for (var page = from; page <= to; page ++) {
+        app.listOfLensParsing('http://m42lens.com/m42-lens-database?site=' + page, './results/lens-' + page + '.json');
+    }
+}
 app.listen('8081')
 
 console.log('Magic happens on port 8081');
-// for (var page = 2; page < 10; page ++) {
-//     app.listOfLensParsing('http://m42lens.com/m42-lens-database?site=' + page, './results/lens-' + page + '.json');
-// }
 
-app.filesProcess(1, 9, './results/lenses.json');
+ app.filesProcess(1, 104, './results/lenses.json');
+// app.batchParsing(31, 40);
 
 exports = module.exports = app;
