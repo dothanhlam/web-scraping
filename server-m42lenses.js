@@ -1,10 +1,12 @@
 var express = require('express');
 var fs = require('fs');
 var concat = require('concat-files');
+var image_downloader = require('image-downloader');
 
 var request = require('request');
 var cheerio = require('cheerio');
 cheerioTableparser = require('cheerio-tableparser');
+
 
 var app = express();
 
@@ -110,7 +112,7 @@ app.parseLensDetail = function(url, file) {
 app.filesProcess = function(from, to, file){
     var allFiles = [];
     for (var i = from; i<= to; i ++) {
-        allFiles.push('./results/lens-' + i + '.json');
+        allFiles.push('./m42lenses/lens-' + i + '.json');
     }
     concat(allFiles, file, function(err) {
         if (err) throw err
@@ -121,14 +123,60 @@ app.filesProcess = function(from, to, file){
 
 app.batchParsing = function(from, to) {
     for (var page = from; page <= to; page ++) {
-        app.listOfLensParsing('http://m42lens.com/m42-lens-database?site=' + page, './results/lens-' + page + '.json');
+        app.listOfLensParsing('http://m42lens.com/m42-lens-database?site=' + page, './m42lenses/lens-' + page + '.json');
     }
 }
-app.listen('8081')
 
+
+
+app.batchDownloadImage = function(images) {
+    downloadImage = function(url, dest, success, fault) {
+        var options = {
+            url: url,
+            dest: dest,
+            done: function(err, filename, image) {
+                if (err) {
+                    if (fault && typeof fault === "function") {
+                        fault(err);
+                    }
+                    else {
+                        throw err;
+                    }
+                }
+
+                if (success && typeof success === "function") {
+                    success({filename: filename, data: image});
+                }
+            }
+        }
+
+        image_downloader(options);
+    }
+
+    var domain = 'http://m42lens.com';
+    for (var i in images) {
+        var image = images[i];
+        downloadImage(domain + image.url, image.dest || './images', function(res) {
+            console.log('success: ', res.filename);
+        },
+        function(err) {
+            console.log('err: ', err);
+        });
+    }
+}
+
+
+
+app.listen('8081')
 console.log('Magic happens on port 8081');
 
- app.filesProcess(1, 104, './results/lenses.json');
+app.filesProcess(1, 104, './m42lenses/lenses.json');
 // app.batchParsing(31, 40);
+/*app.batchDownloadImage([
+    {
+        url: '/images/lenses/1083/a_schacht_ulm_edixa-m-travenar-a_50mm_f2_8-22_m42_01.jpg',
+    }
+]);
+*/
 
 exports = module.exports = app;
