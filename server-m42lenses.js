@@ -170,8 +170,8 @@ app.batchDownloadImage = function(images) {
 app.listen('8081')
 console.log('Magic happens on port 8081');
 
-app.filesProcess(1, 104, './m42lenses/lenses.json');
-// app.batchParsing(31, 40);
+app.filesProcess(1, 108, './m42lenses/lenses.json');
+//app.batchParsing(101, 108);
 /*app.batchDownloadImage([
     {
         url: '/images/lenses/1083/a_schacht_ulm_edixa-m-travenar-a_50mm_f2_8-22_m42_01.jpg',
