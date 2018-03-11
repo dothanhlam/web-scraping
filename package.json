@@ -1,0 +1,21 @@
+{
+  "name": "web-scraping",
+  "version": "1.0.0",
+  "description": "scraping anything",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "m42lens-com": "json-server --watch ./database/m42lens-com.json --port 3004"
+  },
+  "author": "Lam Do",
+  "license": "ISC",
+  "dependencies": {
+    "cheerio": "^0.22.0",
+    "cheerio-tableparser": "^1.0.1",
+    "concat-files": "^0.1.1",
+    "express": "latest",
+    "image-downloader": "^2.0.3",
+    "request": "latest"
+  },
+  "devDependencies": {}
+}
